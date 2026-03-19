@@ -121,7 +121,7 @@ namespace InventoryOrderingSystemTests
             _mockProductRepo.Setup(repo => repo.GetByIdAsync(4)).ReturnsAsync(stock);
 
             var exception = await Assert.ThrowsAsync<InvalidOperationException>(
-                () => _orderService.PlaceOrderAsync(1, 4, 57));
+                () => _orderService.CreateOrderAsync(1, 4, 57));
 
             Assert.Equal("Insufficient product stock.", exception.Message);
         }
@@ -133,7 +133,7 @@ namespace InventoryOrderingSystemTests
             var product = new Product { ProductId = 100, Stock = 10, Price = 15.00m };
             _mockCustomerRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(active);
             _mockProductRepo.Setup(repo => repo.GetByIdAsync(100)).ReturnsAsync(product);
-            var order = await _orderService.PlaceOrderAsync(1, 100, 5);
+            var order = await _orderService.CreateOrderAsync(1, 100, 5);
             Assert.Equal(1, order.CustomerId);
             Assert.Equal(100, order.ProductId);
             Assert.Equal(5, order.Quantity);
@@ -148,7 +148,7 @@ namespace InventoryOrderingSystemTests
             var product = new Product { ProductId = 100, Stock = 10, Price = 15.00m };
             _mockCustomerRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(active);
             _mockProductRepo.Setup(repo => repo.GetByIdAsync(100)).ReturnsAsync(product);
-            await _orderService.PlaceOrderAsync(1, 100, 5);
+            await _orderService.CreateOrderAsync(1, 100, 5);
             _mockOrderRepo.Verify(repo => repo.AddAsync(It.IsAny<Order>()), Times.Once);
 
         }
@@ -161,7 +161,7 @@ namespace InventoryOrderingSystemTests
             var product = new Product { ProductId = 100, Stock = 10, Price = 15.00m };
             _mockCustomerRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(active);
             _mockProductRepo.Setup(repo => repo.GetByIdAsync(100)).ReturnsAsync(product);
-            await _orderService.PlaceOrderAsync(1, 100, 5);
+            await _orderService.CreateOrderAsync(1, 100, 5);
             _mockProductRepo.Verify(repo => repo.UpdateAsync(product), Times.Once);
         }
         [Fact]
@@ -172,7 +172,7 @@ namespace InventoryOrderingSystemTests
             var product = new Product { ProductId = 100, Stock = 10, Price = 15.00m };
             _mockCustomerRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(active);
             _mockProductRepo.Setup(repo => repo.GetByIdAsync(100)).ReturnsAsync(product);
-            await _orderService.PlaceOrderAsync(1, 100, 5);
+            await _orderService.CreateOrderAsync(1, 100, 5);
             Assert.Equal(5, product.Stock);
         }
 

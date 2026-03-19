@@ -12,18 +12,27 @@ namespace InventoryOrderingSystem.Services.Products
             _productRepo = productRepo;
         }
 
-        public async Task<Product?> GetProductByIdAsync(int productId)
+        public async Task<List<Product>> GetAllProductsAsync()
+                => await _productRepo.GetAllAsync();
+
+        public async Task AddAsync(Product product)
+            => await _productRepo.AddAsync(product);
+
+        public async Task UpdatePriceAsync(int id, decimal price)
         {
-            return await _productRepo.GetByIdAsync(productId);
+            var product = await _productRepo.GetByIdAsync(id);
+            if (product == null) return;
+
+            product.Price = price;
+            await _productRepo.UpdateAsync(product);
         }
 
-        public async Task<IEnumerable<Product>> GetAllProductsAsync()
+        public async Task UpdateStockAsync(int id, int stock)
         {
-            return await _productRepo.GetAllAsync();
-        }
+            var product = await _productRepo.GetByIdAsync(id);
+            if (product == null) return;
 
-        public async Task UpdateProductAsync(Product product)
-        {
+            product.Stock = stock;
             await _productRepo.UpdateAsync(product);
         }
     }

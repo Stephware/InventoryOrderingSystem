@@ -5,26 +5,37 @@ using InventoryOrderingSystem.Repository.Products;
 using InventoryOrderingSystem.Services.Customers;
 using InventoryOrderingSystem.Services.Orders;
 using InventoryOrderingSystem.Services.Products;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Add MVC Services
 builder.Services.AddControllersWithViews();
 
-// 2. Configure Entity Framework Core
 builder.Services.AddDbContext<InventoryOrderingSystemContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Connection")));
 
-// 3. Register Repositories
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 
-// 4. Register Services
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/Accounts/Login";
+                    options.AccessDeniedPath = "/Accounts/AccessDenied";
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                    options.SlidingExpiration = true;
+
+                    /* Given path 
+                    https://localhost:7112/Accounts/Login?ReturnUrl=%2FHome%2FLogin */
+
+                    //TODO: Secured Controllers
+                });
 
 var app = builder.Build();
 
@@ -38,6 +49,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

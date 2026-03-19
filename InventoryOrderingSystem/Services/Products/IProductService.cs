@@ -4,8 +4,9 @@ namespace InventoryOrderingSystem.Services.Products
 {
     public interface IProductService
     {
-        Task<Product?> GetProductByIdAsync(int productId);
-        Task<IEnumerable<Product>> GetAllProductsAsync();
-        Task UpdateProductAsync(Product product);
+        Task<List<Product>> GetAllProductsAsync();
+        Task UpdateStockAsync(int id, int stock);
+        Task AddAsync(Product product);
+        Task UpdatePriceAsync(int id, decimal price);
     }
 }

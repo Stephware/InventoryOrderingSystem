@@ -12,12 +12,28 @@ namespace InventoryOrderingSystem.Repository.Customers
             _context = context;
         }
 
-        public async Task<Customer?> GetByIdAsync(int customerId)
+        public async Task<List<Customer>> GetAllAsync()
+            => await _context.Customers.ToListAsync();
+
+        public async Task AddAsync(Customer customer)
         {
-            return await _context.Customers
-                .FirstOrDefaultAsync();
+            _context.Customers.Add(customer);
+            await _context.SaveChangesAsync();
+        }
+        public async Task UpdateAsync(Customer customer)
+        {
+            _context.Customers.Update(customer);
+            await _context.SaveChangesAsync();
         }
 
+        public async Task<Customer?> GetByIdAsync(int customerId)
+        {
+            return await _context.Customers.FindAsync(customerId);
+        }
 
+        public Task ValidateUser(string username, string passwordHash)
+        {
+            return _context.Customers.FirstOrDefault(u => u.Name == username && u.PasswordHash == passwordHash && u.IsActive);
+        }
     }
 }

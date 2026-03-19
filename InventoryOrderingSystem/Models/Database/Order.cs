@@ -9,13 +9,13 @@ public partial class Order
 
     public int CustomerId { get; set; }
 
-    public int ProductId { get; set; }
-
-    public int Quantity { get; set; }
+    public string Status { get; set; } = null!;
 
     public decimal TotalAmount { get; set; }
 
+    public DateTime DateCreated { get; set; }
+
     public virtual Customer Customer { get; set; } = null!;
 
-    public virtual Product Product { get; set; } = null!;
+    public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 }
