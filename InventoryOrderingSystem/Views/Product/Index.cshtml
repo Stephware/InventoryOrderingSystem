@@ -1,0 +1,42 @@
+﻿@model IEnumerable<InventoryOrderingSystem.Models.Database.Product>
+
+@{
+    ViewData["Title"] = "Inventory Management";
+}
+
+<h2>Inventory Management</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success" style="color: green; font-weight: bold; margin-bottom: 15px;">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<table class="table table-striped" style="width: 100%; text-align: left;">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Current Stock</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.ProductId</td>
+                <td>@item.Name</td>
+                <td>$@item.Price</td>
+                <td style="@(item.Stock < 5 ? "color: red; font-weight: bold;" : "")">
+                    @item.Stock
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.ProductId" class="btn btn-sm btn-warning">Update Stock</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

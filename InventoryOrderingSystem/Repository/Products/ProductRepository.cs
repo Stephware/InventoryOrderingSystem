@@ -1,8 +1,9 @@
 ﻿using InventoryOrderingSystem.Models.Database;
+using Microsoft.EntityFrameworkCore;
 
 namespace InventoryOrderingSystem.Repository.Products
 {
-    public class ProductRepository
+    public class ProductRepository : IProductRepository
     {
         private readonly InventoryOrderingSystemContext _context;
 
@@ -10,7 +11,7 @@ namespace InventoryOrderingSystem.Repository.Products
         {
             _context = context;
         }
-        public async Task<Product?> GetbyIdAsync(int id)
+        public async Task<Product?> GetByIdAsync(int id)
         {
             return await _context.Products
                 .FindAsync(id);
@@ -20,6 +21,11 @@ namespace InventoryOrderingSystem.Repository.Products
         {
             _context.Products.Update(product);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<Product>> GetAllAsync()
+        {
+            return await _context.Products.ToListAsync();
         }
     }
 }

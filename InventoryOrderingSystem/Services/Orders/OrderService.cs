@@ -2,6 +2,7 @@
 using InventoryOrderingSystem.Repository.Customers;
 using InventoryOrderingSystem.Repository.Orders;
 using InventoryOrderingSystem.Repository.Products;
+using Microsoft.EntityFrameworkCore;
 
 namespace InventoryOrderingSystem.Services.Orders
 {
@@ -39,8 +40,16 @@ namespace InventoryOrderingSystem.Services.Orders
 
             decimal totalAmount = product.Price * quantity;
 
-            product.Stock = quantity;
-            await _productRepo.UpdateAsync(product);
+            product.Stock -= quantity;
+            try
+            {
+                await _productRepo.UpdateAsync(product);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                // This catches the race condition!
+                throw new InvalidOperationException("Someone else just purchased this item. Please try again to check new stock levels.");
+            }
 
             var order = new Order
             {

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InventoryOrderingSystem.Repository.Orders
 {
-    public class OrderRepository
+    public class OrderRepository : IOrderRepository
     {
         private readonly InventoryOrderingSystemContext _context;
 

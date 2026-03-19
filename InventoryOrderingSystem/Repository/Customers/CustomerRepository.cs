@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InventoryOrderingSystem.Repository.Customers
 {
-    public class CustomerRepository
+    public class CustomerRepository : ICustomerRepository
     {
         private readonly InventoryOrderingSystemContext _context;
 
@@ -12,11 +12,12 @@ namespace InventoryOrderingSystem.Repository.Customers
             _context = context;
         }
 
-        public async Task<Customer?> GetbyIdAsync(int customerId)
+        public async Task<Customer?> GetByIdAsync(int customerId)
         {
             return await _context.Customers
-                .Include(x=>x.CustomerId)
                 .FirstOrDefaultAsync();
         }
+
+
     }
 }

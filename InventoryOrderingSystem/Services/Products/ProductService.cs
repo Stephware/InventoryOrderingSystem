@@ -16,5 +16,15 @@ namespace InventoryOrderingSystem.Services.Products
         {
             return await _productRepo.GetByIdAsync(productId);
         }
+
+        public async Task<IEnumerable<Product>> GetAllProductsAsync()
+        {
+            return await _productRepo.GetAllAsync();
+        }
+
+        public async Task UpdateProductAsync(Product product)
+        {
+            await _productRepo.UpdateAsync(product);
+        }
     }
 }

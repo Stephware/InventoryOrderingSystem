@@ -59,7 +59,7 @@ namespace InventoryOrderingSystemTests
         public async Task PlaceOrderAsync_Rule5_StockIsZero_ThrowsException()
         {
             var active = new Customer { CustomerId = 1, IsActive = true };
-            var empty = new Product { ProductId = 100, Stock = 0, Price = 10.00m};
+            var empty = new Product { ProductId = 100, Stock = 0, Price = 10.00m };
 
             _mockCustomerRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(active);
             _mockProductRepo.Setup(repo => repo.GetByIdAsync(100)).ReturnsAsync(empty);
@@ -94,7 +94,7 @@ namespace InventoryOrderingSystemTests
             var order = await _orderService.PlaceOrderAsync(3, 57, quantity);
 
             Assert.Equal(105.00m, order.TotalAmount);
-            _mockOrderRepo.Verify(repo=>repo.AddAsync(It.IsAny<Order>()), Times.Once());
+            _mockOrderRepo.Verify(repo => repo.AddAsync(It.IsAny<Order>()), Times.Once());
         }
 
         [Fact]
@@ -105,7 +105,7 @@ namespace InventoryOrderingSystemTests
             _mockCustomerRepo.Setup(repo => repo.GetByIdAsync(3)).ReturnsAsync(active);
             _mockProductRepo.Setup(repo => repo.GetByIdAsync(57)).ReturnsAsync((Product)null);
 
-            var exception = await Assert.ThrowsAsync<InvalidOperationException > (
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(
                 () => _orderService.PlaceOrderAsync(3, 157, 1));
 
             Assert.Equal("Product does not exist.", exception.Message);
@@ -125,6 +125,114 @@ namespace InventoryOrderingSystemTests
 
             Assert.Equal("Insufficient product stock.", exception.Message);
         }
+        [Fact]
 
+        public async Task PlaceOrderAsync_SuccessfulOrder_ReturnsOrderWithCorrectDetails()
+        {
+            var active = new Customer { CustomerId = 1, IsActive = true };
+            var product = new Product { ProductId = 100, Stock = 10, Price = 15.00m };
+            _mockCustomerRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(active);
+            _mockProductRepo.Setup(repo => repo.GetByIdAsync(100)).ReturnsAsync(product);
+            var order = await _orderService.PlaceOrderAsync(1, 100, 5);
+            Assert.Equal(1, order.CustomerId);
+            Assert.Equal(100, order.ProductId);
+            Assert.Equal(5, order.Quantity);
+            Assert.Equal(75.00m, order.TotalAmount);
+        }
+
+        [Fact]
+
+        public async Task PlaceOrderAsync_SuccessfulOrder_CallsAddAsyncOnOrderRepository()
+        {
+            var active = new Customer { CustomerId = 1, IsActive = true };
+            var product = new Product { ProductId = 100, Stock = 10, Price = 15.00m };
+            _mockCustomerRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(active);
+            _mockProductRepo.Setup(repo => repo.GetByIdAsync(100)).ReturnsAsync(product);
+            await _orderService.PlaceOrderAsync(1, 100, 5);
+            _mockOrderRepo.Verify(repo => repo.AddAsync(It.IsAny<Order>()), Times.Once);
+
+        }
+
+        [Fact]
+
+        public async Task PlaceOrderAsync_SuccessfulOrder_CallsUpdateAsyncOnProductRepository()
+        {
+            var active = new Customer { CustomerId = 1, IsActive = true };
+            var product = new Product { ProductId = 100, Stock = 10, Price = 15.00m };
+            _mockCustomerRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(active);
+            _mockProductRepo.Setup(repo => repo.GetByIdAsync(100)).ReturnsAsync(product);
+            await _orderService.PlaceOrderAsync(1, 100, 5);
+            _mockProductRepo.Verify(repo => repo.UpdateAsync(product), Times.Once);
+        }
+        [Fact]
+
+        public async Task PlaceOrderAsync_SuccessfulOrder_ReducesProductStock()
+        {
+            var active = new Customer { CustomerId = 1, IsActive = true };
+            var product = new Product { ProductId = 100, Stock = 10, Price = 15.00m };
+            _mockCustomerRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(active);
+            _mockProductRepo.Setup(repo => repo.GetByIdAsync(100)).ReturnsAsync(product);
+            await _orderService.PlaceOrderAsync(1, 100, 5);
+            Assert.Equal(5, product.Stock);
+        }
+
+        [Fact]
+
+        public async Task PlaceOrderAsync_SuccessfulOrder_ReturnsOrderWithCorrectTotalAmount()
+        {
+            var active = new Customer { CustomerId = 1, IsActive = true };
+            var product = new Product { ProductId = 100, Stock = 10, Price = 15.00m };
+            _mockCustomerRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(active);
+            _mockProductRepo.Setup(repo => repo.GetByIdAsync(100)).ReturnsAsync(product);
+            var order = await _orderService.PlaceOrderAsync(1, 100, 5);
+            Assert.Equal(75.00m, order.TotalAmount);
+        }
+
+        [Fact]
+
+        public async Task PlaceOrderAsync_SuccessfulOrder_ReturnsOrderWithCorrectCustomerAndProductIds()
+        {
+            var active = new Customer { CustomerId = 1, IsActive = true };
+            var product = new Product { ProductId = 100, Stock = 10, Price = 15.00m };
+            _mockCustomerRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(active);
+            _mockProductRepo.Setup(repo => repo.GetByIdAsync(100)).ReturnsAsync(product);
+            var order = await _orderService.PlaceOrderAsync(1, 100, 5);
+            Assert.Equal(1, order.CustomerId);
+            Assert.Equal(100, order.ProductId);
+        }
+
+        [Fact]
+        public async Task PlaceOrderAsync_SuccessfulOrder_ReturnsOrderWithCorrectQuantity()
+        {
+            var active = new Customer { CustomerId = 1, IsActive = true };
+            var product = new Product { ProductId = 100, Stock = 10, Price = 15.00m };
+            _mockCustomerRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(active);
+            _mockProductRepo.Setup(repo => repo.GetByIdAsync(100)).ReturnsAsync(product);
+            var order = await _orderService.PlaceOrderAsync(1, 100, 5);
+            Assert.Equal(5, order.Quantity);
+        }
+
+        [Fact]
+        public async Task PlaceOrderAsync_SuccessfulOrder_ReturnsOrderWithNonNullCustomerAndProduct()
+        {
+            var active = new Customer { CustomerId = 1, IsActive = true };
+            var product = new Product { ProductId = 100, Stock = 10, Price = 15.00m };
+            _mockCustomerRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(active);
+            _mockProductRepo.Setup(repo => repo.GetByIdAsync(100)).ReturnsAsync(product);
+            var order = await _orderService.PlaceOrderAsync(1, 100, 5);
+            Assert.Null(order.Customer);
+            Assert.Null(order.Product);
+        }
+
+        [Fact]
+        public async Task PlaceOrderAsync_SuccessfulOrder_ReturnsOrderWithCorrectTotalAmountCalculation()
+        {
+            var active = new Customer { CustomerId = 1, IsActive = true };
+            var product = new Product { ProductId = 100, Stock = 10, Price = 15.00m };
+            _mockCustomerRepo.Setup(repo => repo.GetByIdAsync(1)).ReturnsAsync(active);
+            _mockProductRepo.Setup(repo => repo.GetByIdAsync(100)).ReturnsAsync(product);
+            var order = await _orderService.PlaceOrderAsync(1, 100, 5);
+            Assert.Equal(75.00m, order.TotalAmount);
+        }
     }
 }
