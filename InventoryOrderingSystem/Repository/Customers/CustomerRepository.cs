@@ -33,7 +33,8 @@ namespace InventoryOrderingSystem.Repository.Customers
 
         public Task ValidateUser(string username, string passwordHash)
         {
-            return _context.Customers.FirstOrDefault(u => u.Name == username && u.PasswordHash == passwordHash && u.IsActive);
+            throw new NotImplementedException();
+            //return _context.Customers.FirstOrDefault(u => u.Username == username && u.PasswordHash == passwordHash && u.IsActive);
         }
     }
 }
