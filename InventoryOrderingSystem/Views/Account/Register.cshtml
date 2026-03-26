@@ -1,0 +1,83 @@
+﻿@model RegistrationModel
+
+@{
+
+}
+
+
+
+<html>
+<head>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <script src="~/sweetalert2/sweetalert2.min.js"></script>
+    <link rel="stylesheet" href="~/sweetalert2/sweetalert2.css/" />
+</head>
+<body class="container">
+    @{
+        if (ViewBag.SuccessMessage != null)
+        {
+            // <div class="alert alert-primary" role="alert">
+            //     @ViewBag.SuccessMessage
+            // </div>
+            <script>
+                Swal.fire({
+                         title: "Success!",
+                         text: '@ViewBag.SuccessMessage',
+                         icon: "success"
+                     })
+            </script>
+        }
+
+        else if (ViewBag.ErrorMessage != null)
+        {
+            <div class="alert alert-danger" role="alert">
+                @ViewBag.ErrorMessage
+            </div>
+            <script>
+                Swal.fire({
+                         title: "Failed",
+                         text: '@ViewBag.errorMessage',
+                         icon: "error"
+                     })
+            </script>
+        }
+
+    }
+    @using (Html.BeginForm("Register", "Account", FormMethod.Post))
+    {
+        <div class="form-group">
+            @Html.LabelFor(x => x.Username, new { @class = "form-label" })
+            @Html.TextBoxFor(x => x.Username, new { @class = "form-control" })
+            @Html.ValidationMessageFor(x => x.Username, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(x => x.FirstName, new { @class = "form-label" })
+            @Html.TextBoxFor(x => x.FirstName, new { @class = "form-control" })
+            @Html.ValidationMessageFor(x => x.FirstName, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(x => x.LastName, new { @class = "form-label" })
+            @Html.TextBoxFor(x => x.LastName, new { @class = "form-control" })
+            @Html.ValidationMessageFor(x => x.LastName, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(x => x.Password, new { @class = "form-label" })
+            @Html.PasswordFor(x => x.Password, new { @class = "form-control" })
+            @Html.ValidationMessageFor(x => x.Password, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(x => x.ConfirmPassword, new { @class = "form-label" })
+            @Html.PasswordFor(x => x.ConfirmPassword, new { @class = "form-control" })
+            @Html.ValidationMessageFor(x => x.ConfirmPassword, "", new { @class = "text-danger" })
+        </div>
+
+        <button class="btn btn-info" type="submit" style="margin-top:10px">Signup</button>
+    }
+
+</body>
+</html>

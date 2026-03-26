@@ -26,8 +26,8 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.LoginPath = "/Accounts/Login";
-                    options.AccessDeniedPath = "/Accounts/AccessDenied";
+                    options.LoginPath = "/Account/Login";
+                    options.AccessDeniedPath = "/Account/AccessDenied";
                     options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
                     options.SlidingExpiration = true;
 
@@ -54,6 +54,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Order}/{action=Create}/{id?}"); // Defaulting to Order/Create for testing
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();

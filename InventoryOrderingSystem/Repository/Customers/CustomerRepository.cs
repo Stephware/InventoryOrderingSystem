@@ -15,6 +15,16 @@ namespace InventoryOrderingSystem.Repository.Customers
         public async Task<List<Customer>> GetAllAsync()
             => await _context.Customers.ToListAsync();
 
+        public async Task <Customer?> GetUsernameAsync(string username)
+        {
+            return await _context.Customers.Where(x => x.Username == username).FirstOrDefaultAsync();
+        }
+        public async Task RegisterUser(Customer customer)
+        {
+            _context.Customers.Add(customer);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task AddAsync(Customer customer)
         {
             _context.Customers.Add(customer);
@@ -31,10 +41,9 @@ namespace InventoryOrderingSystem.Repository.Customers
             return await _context.Customers.FindAsync(customerId);
         }
 
-        public Task ValidateUser(string username, string passwordHash)
+        public async Task <Customer?> ValidateUser(string username, string passwordHash)
         {
-            throw new NotImplementedException();
-            //return _context.Customers.FirstOrDefault(u => u.Username == username && u.PasswordHash == passwordHash && u.IsActive);
+            return await _context.Customers.FirstOrDefaultAsync(u => u.Username == username && u.PasswordHash == passwordHash && u.IsActive);
         }
     }
 }

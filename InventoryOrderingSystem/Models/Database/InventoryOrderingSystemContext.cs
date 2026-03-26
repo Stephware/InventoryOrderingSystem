@@ -15,8 +15,6 @@ public partial class InventoryOrderingSystemContext : DbContext
     {
     }
 
-    public virtual DbSet<Admin> Admins { get; set; }
-
     public virtual DbSet<Customer> Customers { get; set; }
 
     public virtual DbSet<Order> Orders { get; set; }
@@ -25,42 +23,30 @@ public partial class InventoryOrderingSystemContext : DbContext
 
     public virtual DbSet<Product> Products { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=EA611-11;Database=InventoryOrderingSystem;Trusted_Connection=True;TrustServerCertificate=True");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Admin>(entity =>
-        {
-            entity.HasKey(e => e.AdminId).HasName("PK__Admins__719FE48819E3432A");
-
-            entity.HasIndex(e => e.Username, "UQ__Admins__536C85E43FDA55BE").IsUnique();
-
-            entity.Property(e => e.PasswordHash)
-                .HasMaxLength(255)
-                .IsUnicode(false);
-            entity.Property(e => e.Username)
-                .HasMaxLength(50)
-                .IsUnicode(false);
-        });
-
         modelBuilder.Entity<Customer>(entity =>
         {
-            entity.HasKey(e => e.CustomerId).HasName("PK__Customer__A4AE64D8822FA4BF");
+            entity.HasKey(e => e.CustomerId).HasName("PK__Customer__A4AE64D8A5C874AE");
 
+            entity.Property(e => e.FirstName)
+                .HasMaxLength(100)
+                .IsUnicode(false);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
-            entity.Property(e => e.Name)
+            entity.Property(e => e.LastName)
                 .HasMaxLength(100)
                 .IsUnicode(false);
             entity.Property(e => e.PasswordHash)
                 .HasMaxLength(255)
                 .IsUnicode(false);
+            entity.Property(e => e.Username)
+                .HasMaxLength(100)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<Order>(entity =>
         {
-            entity.HasKey(e => e.OrderId).HasName("PK__Orders__C3905BCFC7B1C9D5");
+            entity.HasKey(e => e.OrderId).HasName("PK__Orders__C3905BCFD44BA6A2");
 
             entity.Property(e => e.DateCreated)
                 .HasDefaultValueSql("(getdate())")
@@ -79,7 +65,7 @@ public partial class InventoryOrderingSystemContext : DbContext
 
         modelBuilder.Entity<OrderItem>(entity =>
         {
-            entity.HasKey(e => e.OrderItemId).HasName("PK__OrderIte__57ED068127BF61D4");
+            entity.HasKey(e => e.OrderItemId).HasName("PK__OrderIte__57ED0681BA4FCF6E");
 
             entity.Property(e => e.Price).HasColumnType("decimal(20, 2)");
 
@@ -96,16 +82,16 @@ public partial class InventoryOrderingSystemContext : DbContext
 
         modelBuilder.Entity<Product>(entity =>
         {
-            entity.HasKey(e => e.ProductId).HasName("PK__Products__B40CC6CDAC9B4611");
+            entity.HasKey(e => e.ProductId).HasName("PK__Products__B40CC6CD9E8C467C");
 
-            entity.HasIndex(e => e.ProductCode, "UQ__Products__2F4E024F9C5E4D77").IsUnique();
+            entity.HasIndex(e => e.ProductCode, "UQ__Products__2F4E024F3D9A039E").IsUnique();
 
-            entity.Property(e => e.Name)
-                .HasMaxLength(100)
-                .IsUnicode(false);
             entity.Property(e => e.Price).HasColumnType("decimal(20, 2)");
             entity.Property(e => e.ProductCode)
                 .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.ProductName)
+                .HasMaxLength(100)
                 .IsUnicode(false);
         });
 

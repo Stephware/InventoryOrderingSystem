@@ -6,8 +6,10 @@ namespace InventoryOrderingSystem.Repository.Customers
     {
         Task<List<Customer>> GetAllAsync();
         Task<Customer?> GetByIdAsync(int customerId); 
+        Task<Customer?> GetUsernameAsync (string username);
+        Task<Customer?> ValidateUser(string username, string passwordHash);
+        Task RegisterUser(Customer customer);
         Task AddAsync(Customer customer);
         Task UpdateAsync(Customer customer);
-        Task ValidateUser(string username, string passwordHash);
     }
 }

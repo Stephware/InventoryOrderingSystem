@@ -1,0 +1,135 @@
+﻿@model IEnumerable<InventoryOrderingSystem.Models.Database.Order>
+
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Orders</h2>
+
+    @if (User.IsInRole("Admin") || User.IsInRole("Customer"))
+    {
+        <a asp-action="Create" class="btn btn-primary">Create Order</a>
+    }
+</div>
+
+<!-- SUCCESS / ERROR MESSAGES -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["Success"]
+    </div>
+}
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+<table class="table table-bordered table-hover align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>Status</th>
+            <th>Customer</th>
+            <th>Total Amount</th>
+            <th>Date Created</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var order in Model)
+            {
+                <tr>
+                    <!-- STATUS -->
+                    <td>
+                        @if (order.Status == "Completed")
+                        {
+                            <span class="badge bg-success">Completed</span>
+                        }
+                        else if (order.Status == "Cancelled")
+                        {
+                            <span class="badge bg-danger">Cancelled</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        }
+                    </td>
+
+                    <!-- CUSTOMER -->
+                    <td>@order.Customer?.Username</td>
+
+                    <!-- TOTAL -->
+                    <td>@order.TotalAmount.ToString("C", new System.Globalization.CultureInfo("en-PH"))</td>
+
+                    <!-- DATE -->
+                    <td>@order.DateCreated.ToString("yyyy-MM-dd HH:mm")</td>
+
+                    <!-- ACTIONS -->
+                    <td>
+                        <!-- VIEW DETAILS -->
+                        <a asp-action="Details"
+                           asp-route-id="@order.OrderId"
+                           class="btn btn-sm btn-info">
+                            View
+                        </a>
+
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <!-- MARK COMPLETED -->
+                            @if (order.Status == "Pending")
+                            {
+                                <form asp-action="MarkCompleted"
+                                      method="post"
+                                      style="display:inline;">
+                                    <input type="hidden"
+                                           name="id"
+                                           value="@order.OrderId" />
+                                    <button class="btn btn-success btn-sm"
+                                            onclick="return confirm('Mark this order as completed?')">
+                                        Complete
+                                    </button>
+                                </form>
+                            }
+
+                            <a asp-action="Edit"
+                               asp-route-id="@order.OrderId"
+                               class="btn btn-warning btn-sm">
+                                Edit
+                            </a>
+
+                            <!-- CANCEL -->
+                            @if (order.Status != "Cancelled")
+                            {
+                                <form asp-action="Cancel"
+                                      method="post"
+                                      style="display:inline;">
+                                    <input type="hidden"
+                                           name="id"
+                                           value="@order.OrderId" />
+                                    <button class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Cancel this order?')">
+                                        Cancel
+                                    </button>
+                                </form>
+                            }
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="text-center text-muted">
+                    No orders found.
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

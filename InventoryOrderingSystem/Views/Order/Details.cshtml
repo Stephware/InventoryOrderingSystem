@@ -1,0 +1,147 @@
+﻿@model InventoryOrderingSystem.Models.Database.Order
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<h2 class="mb-4">Order Details</h2>
+
+<!-- ORDER SUMMARY -->
+<div class="card mb-4">
+    <div class="card-header bg-dark text-white">
+        Order Information
+    </div>
+    <div class="card-body">
+
+        <div class="row mb-2">
+            <div class="col-md-3"><strong>Status:</strong></div>
+            <div class="col-md-9">
+                @if (Model.Status == "Completed")
+                {
+                    <span class="badge bg-success">Completed</span>
+                }
+                else if (Model.Status == "Cancelled")
+                {
+                    <span class="badge bg-danger">Cancelled</span>
+                }
+                else
+                {
+                    <span class="badge bg-warning text-dark">Pending</span>
+                }
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-md-3"><strong>Customer:</strong></div>
+            <div class="col-md-9">
+                @Model.Customer?.Username
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-md-3"><strong>Date Created:</strong></div>
+            <div class="col-md-9">
+                @Model.DateCreated.ToString("yyyy-MM-dd HH:mm")
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3"><strong>Total Amount:</strong></div>
+            <div class="col-md-9">
+                <strong class="text-success">
+                    @Model.TotalAmount.ToString("C", new System.Globalization.CultureInfo("en-PH"))
+                </strong>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ORDER ITEMS -->
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        Order Items
+    </div>
+
+    <div class="card-body p-0">
+        <table class="table table-bordered table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.OrderItems != null && Model.OrderItems.Any())
+                {
+                    foreach (var item in Model.OrderItems)
+                    {
+                        <tr>
+                            <td>@item.Product?.ProductName</td>
+
+                            <td>
+                                @item.Price.ToString("C", new System.Globalization.CultureInfo("en-PH"))
+                            </td>
+
+                            <td>@item.Quantity</td>
+
+                            <td>
+                                @{
+                                    var subtotal = item.Price * item.Quantity;
+                                }
+                                @subtotal.ToString("C", new System.Globalization.CultureInfo("en-PH"))
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" class="text-center text-muted">
+                            No items found for this order.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ACTION BUTTONS -->
+<div class="mt-4">
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Back to Orders
+    </a>
+
+    @if (User.IsInRole("Admin"))
+    {
+        <!-- COMPLETE -->
+        @if (Model.Status == "Pending")
+        {
+            <form asp-action="MarkCompleted" method="post" style="display:inline;">
+                <input type="hidden" name="id" value="@Model.OrderId" />
+                <button class="btn btn-success"
+                        onclick="return confirm('Mark this order as completed?')">
+                    Mark as Completed
+                </button>
+            </form>
+        }
+
+        <!-- CANCEL -->
+        @if (Model.Status != "Cancelled")
+        {
+            <form asp-action="Cancel" method="post" style="display:inline;">
+                <input type="hidden" name="id" value="@Model.OrderId" />
+                <button class="btn btn-danger"
+                        onclick="return confirm('Cancel this order?')">
+                    Cancel Order
+                </button>
+            </form>
+        }
+    }
+
+</div>
