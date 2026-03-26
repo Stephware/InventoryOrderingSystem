@@ -37,7 +37,7 @@ namespace InventoryOrderingSystem.Controllers
                 });
         }
 
-        // --- ADMIN LOGIN ---
+        // ADMIN LOGIN
         [HttpGet]
         public IActionResult Login()
         {
@@ -54,7 +54,7 @@ namespace InventoryOrderingSystem.Controllers
                 return View(model);
 
             string adminUsername = "admin";
-            string adminPassword = "admin123"; // you can change this
+            string adminPassword = "123456"; 
 
             if (model.Username == adminUsername && model.Password == adminPassword)
             {
@@ -83,7 +83,7 @@ namespace InventoryOrderingSystem.Controllers
 
 
 
-        // --- REGISTRATION ---
+        //REGISTRATION
         [HttpGet]
         public IActionResult Register()
         {
@@ -97,16 +97,14 @@ namespace InventoryOrderingSystem.Controllers
             {
                 try
                 {
-                    // Awaits your service logic to create the customer
                     await _customerService.RegisterUser(model);
 
                     ViewBag.SuccessMessage = "Registration successful!";
                     ModelState.Clear();
-                    return View(new RegistrationModel()); // Reset the form
+                    return View(new RegistrationModel()); //Reset the form
                 }
                 catch (Exception ex)
                 {
-                    // If your service throws an exception (e.g., "Username taken")
                     ViewBag.ErrorMessage = ex.Message;
                 }
             }

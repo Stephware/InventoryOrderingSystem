@@ -7,7 +7,6 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Customer Management</h2>
 
-    <!-- ADD NEW CUSTOMER -->
     <a asp-controller="Account"
        asp-action="Register"
        class="btn btn-primary">
@@ -15,7 +14,6 @@
     </a>
 </div>
 
-<!-- TABLE -->
 <table class="table table-striped table-hover border align-middle">
     <thead class="table-dark">
         <tr>
@@ -34,17 +32,12 @@
             foreach (var customer in Model)
             {
                 <tr>
-                    <!-- ID -->
                     <td>@customer.CustomerId</td>
-
-                    <!-- USERNAME -->
                     <td>@customer.Username</td>
 
-                    <!-- NAME -->
                     <td>@customer.FirstName</td>
                     <td>@customer.LastName</td>
 
-                    <!-- STATUS -->
                     <td>
                         @if (customer.IsActive)
                         {
@@ -56,7 +49,6 @@
                         }
                     </td>
 
-                    <!-- ACTION -->
                     <td>
                         <form asp-action="ToggleStatus"
                               method="post"

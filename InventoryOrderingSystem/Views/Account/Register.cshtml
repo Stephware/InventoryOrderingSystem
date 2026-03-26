@@ -17,9 +17,9 @@
     @{
         if (ViewBag.SuccessMessage != null)
         {
-            // <div class="alert alert-primary" role="alert">
-            //     @ViewBag.SuccessMessage
-            // </div>
+            <div class="alert alert-primary" role="alert">
+            @ViewBag.SuccessMessage
+            </div>
             <script>
                 Swal.fire({
                          title: "Success!",

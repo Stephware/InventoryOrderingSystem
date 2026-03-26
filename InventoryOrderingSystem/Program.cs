@@ -34,12 +34,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
                     /* Given path 
                     https://localhost:7112/Accounts/Login?ReturnUrl=%2FHome%2FLogin */
 
-                    //TODO: Secured Controllers
                 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");

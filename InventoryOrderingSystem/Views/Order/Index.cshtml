@@ -13,7 +13,6 @@
     }
 </div>
 
-<!-- SUCCESS / ERROR MESSAGES -->
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success">
@@ -45,7 +44,6 @@
             foreach (var order in Model)
             {
                 <tr>
-                    <!-- STATUS -->
                     <td>
                         @if (order.Status == "Completed")
                         {
@@ -61,18 +59,13 @@
                         }
                     </td>
 
-                    <!-- CUSTOMER -->
                     <td>@order.Customer?.Username</td>
 
-                    <!-- TOTAL -->
                     <td>@order.TotalAmount.ToString("C", new System.Globalization.CultureInfo("en-PH"))</td>
 
-                    <!-- DATE -->
                     <td>@order.DateCreated.ToString("yyyy-MM-dd HH:mm")</td>
 
-                    <!-- ACTIONS -->
                     <td>
-                        <!-- VIEW DETAILS -->
                         <a asp-action="Details"
                            asp-route-id="@order.OrderId"
                            class="btn btn-sm btn-info">
@@ -81,7 +74,6 @@
 
                         @if (User.IsInRole("Admin"))
                         {
-                            <!-- MARK COMPLETED -->
                             @if (order.Status == "Pending")
                             {
                                 <form asp-action="MarkCompleted"
@@ -103,7 +95,6 @@
                                 Edit
                             </a>
 
-                            <!-- CANCEL -->
                             @if (order.Status != "Cancelled")
                             {
                                 <form asp-action="Cancel"

@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryOrderingSystem.Controllers
 {
-    // Helper classes to bind the HTML form data
     public class OrderSubmitForm
     {
         public int CustomerId { get; set; }
@@ -79,7 +78,7 @@ namespace InventoryOrderingSystem.Controllers
                 return RedirectToAction("Create");
             }
 
-            // 🔥 CUSTOMER AUTO-ASSIGN
+            
             if (User.IsInRole("Customer"))
             {
                 var username = User.Identity.Name;
