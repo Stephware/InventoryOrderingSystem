@@ -13,22 +13,34 @@
 
     @for (int i = 0; i < Model.OrderItems.Count; i++)
     {
+        var orderItem = Model.OrderItems.ElementAt(i);
+        var product = orderItem.Product;
+
         <div class="row mb-2">
             <div class="col-5">
-                <input type="hidden" name="items[@i].ProductId" value="@Model.OrderItems.ElementAt(i).ProductId" />
-                <label>@Model.OrderItems.ElementAt(i).Product?.ProductName</label>
+                <input type="hidden" name="items[@i].ProductId" value="@orderItem.ProductId" />
+                <label>
+                    @product?.ProductName
+                    <span class="text-muted">(Current Stock: @product?.Stock)</span>
+                </label>
             </div>
 
             <div class="col-3">
                 <input type="number"
                        name="items[@i].Quantity"
-                       value="@Model.OrderItems.ElementAt(i).Quantity"
+                       value="@orderItem.Quantity"
                        class="form-control"
-                       min="0" />
+                       min="0"
+                       max="@product?.Stock"
+                       required />
+            </div>
+
+            <div class="col-4">
+                <span class="text-danger">@Html.ValidationMessage($"items[{i}].Quantity")</span>
             </div>
         </div>
     }
 
-    <button class="btn btn-success mt-3">Update Order</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+    <button type="submit" class="btn btn-success mt-3">Update Order</button>
+    <a asp-action="Index" class="btn btn-secondary mt-3">Cancel</a>
 </form>

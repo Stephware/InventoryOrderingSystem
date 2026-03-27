@@ -55,9 +55,20 @@ namespace InventoryOrderingSystem.Controllers
         }
 
         [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> UpdatePrice(int id, decimal price)
         {
+            if (price < 0)
+            {
+                ModelState.AddModelError("", "Price cannot be negative.");
+
+                var products = await _productService.GetAllProductsAsync();
+                return View("Index", products);
+            }
+
             await _productService.UpdatePriceAsync(id, price);
+
+            TempData["Success"] = "Price updated.";
             return RedirectToAction("Index");
         }
     }

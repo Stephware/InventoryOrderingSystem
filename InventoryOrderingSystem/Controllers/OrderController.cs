@@ -153,12 +153,19 @@ namespace InventoryOrderingSystem.Controllers
             }
         }
 
-
-
         [HttpPost]
         public async Task<IActionResult> Cancel(int id)
         {
-            await _orderService.CancelOrderAsync(id);
+            try
+            {
+                await _orderService.CancelOrderAsync(id);
+                TempData["Success"] = "Order cancelled.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+            }
+
             return RedirectToAction("Index");
         }
     }

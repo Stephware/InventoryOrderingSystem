@@ -1,13 +1,9 @@
-﻿@*
-
-*@
-@{
+﻿@{
     var isAdmin = User.IsInRole("Admin");
 }
 
 <form asp-action="Create" method="post">
 
-    <!-- ADMIN ONLY: SELECT CUSTOMER -->
     @if (isAdmin)
     {
         <div class="form-group mb-3">
@@ -30,32 +26,30 @@
         </div>
     }
 
-    <!-- PRODUCTS -->
-    <h5>Products</h5>
+    <h5>Select Product</h5>
 
-    @for (int i = 0; i < ((List<InventoryOrderingSystem.Models.Database.Product>)ViewBag.Products).Count; i++)
-    {
-        var product = ((List<InventoryOrderingSystem.Models.Database.Product>)ViewBag.Products)[i];
-
-        <div class="row mb-2">
-            <div class="col-5">
-                <input type="hidden" name="Items[@i].ProductId" value="@product.ProductId" />
-                <label>
-                    @product.ProductName
-                    (Stock: @product.Stock)
-                </label>
-            </div>
-
-            <div class="col-3">
-                <input type="number"
-                       name="Items[@i].Quantity"
-                       class="form-control"
-                       min="0"
-                       max="@product.Stock"
-                       placeholder="Qty" />
-            </div>
+    <div class="row mb-2">
+        <div class="col-5">
+            <select name="Items[0].ProductId" class="form-control" required>
+                <option value="">-- Select a Product --</option>
+                @foreach (var product in ViewBag.Products)
+                {
+                    <option value="@product.ProductId">
+                        @product.ProductName (Stock: @product.Stock)
+                    </option>
+                }
+            </select>
         </div>
-    }
 
-    <button class="btn btn-success mt-3">Place Order</button>
+        <div class="col-3">
+            <input type="number"
+                   name="Items[0].Quantity"
+                   class="form-control"
+                   min="1"
+                   placeholder="Qty"
+                   required />
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success mt-3">Place Order</button>
 </form>

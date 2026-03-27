@@ -31,7 +31,6 @@ namespace InventoryOrderingSystem.Services.Orders
         public async Task<Order?> GetByIdAsync(int orderId)
             => await _orderRepo.GetByIdAsync(orderId);
 
-        // ✅ CANCEL ORDER (RESTORES STOCK)
         public async Task CancelOrderAsync(int orderId)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -39,9 +38,14 @@ namespace InventoryOrderingSystem.Services.Orders
             try
             {
                 var order = await _orderRepo.GetByIdAsync(orderId);
-                if (order == null) return;
+                if (order == null)
+                    throw new Exception("Order not found.");
 
-                if (order.Status == "Cancelled") return;
+                if (order.Status == "Completed")
+                    throw new Exception("Cannot cancel a completed order.");
+
+                order.Status = "Cancelled";
+                await _orderRepo.UpdateAsync(order);
 
                 foreach (var item in order.OrderItems)
                 {
@@ -68,7 +72,6 @@ namespace InventoryOrderingSystem.Services.Orders
         public async Task UpdateOrderAsync(Order order)
             => await _orderRepo.UpdateAsync(order);
 
-        // ✅ CREATE ORDER (FULLY SAFE)
         public async Task CreateOrderAsync(int customerId, List<(int productId, int qty)> items)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -108,7 +111,7 @@ namespace InventoryOrderingSystem.Services.Orders
                         throw new Exception($"{product.ProductName} is out of stock.");
 
                     if (product.Stock < item.qty)
-                        throw new Exception($"Not enough stock for {product.ProductName}.");
+                        throw new Exception($"Not enough stock for {product.ProductName}. Available: {product.Stock}");
 
                     // Constraint 4
                     product.Stock -= item.qty;
@@ -149,7 +152,6 @@ namespace InventoryOrderingSystem.Services.Orders
             return order;
         }
 
-        // 🔥 MODIFY ORDER (CRITICAL FEATURE)
         public async Task UpdateOrderItemsAsync(int orderId, List<(int productId, int qty)> newItems)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
@@ -169,7 +171,6 @@ namespace InventoryOrderingSystem.Services.Orders
                 if (newItems == null || !newItems.Any())
                     throw new Exception("Order must contain at least one item.");
 
-                // 🔁 RESTORE OLD STOCK
                 foreach (var oldItem in order.OrderItems)
                 {
                     var product = await _productRepo.GetByIdAsync(oldItem.ProductId);
@@ -186,7 +187,6 @@ namespace InventoryOrderingSystem.Services.Orders
 
                 decimal total = 0;
 
-                // 🔍 VALIDATE + APPLY
                 foreach (var item in newItems)
                 {
                     var product = await _productRepo.GetByIdAsync(item.productId);
