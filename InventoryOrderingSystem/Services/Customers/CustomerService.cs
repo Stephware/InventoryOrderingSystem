@@ -27,26 +27,29 @@
                 return isPwMatch;
             }
 
-            public async Task RegisterUser(RegistrationModel model)
+        public async Task RegisterUser(RegistrationModel model)
+        {
+            
+            var existingUser = await _repo.GetUsernameAsync(model.Username);
+
+            if (existingUser != null)
             {
-                var existing = await _repo.GetUsernameAsync(model.Username);
-
-                if (existing != null)
-                    throw new InvalidOperationException("Username already exists");
-
-                var user = new Customer
-                {
-                    Username = model.Username,
-                    PasswordHash = SecurityHelper.HashPassword(model.Password),
-                    FirstName = model.FirstName,
-                    LastName = model.LastName,
-                    IsActive = true
-                };
-
-                await _repo.AddAsync(user);
+                throw new Exception("Username already exists.");
             }
 
-            public async Task<List<Customer>> GetAllAsync()
+            var user = new Customer
+            {
+                Username = model.Username,
+                PasswordHash = SecurityHelper.HashPassword(model.Password),
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                IsActive = true
+            };
+
+            await _repo.AddAsync(user);
+        }
+
+        public async Task<List<Customer>> GetAllAsync()
                 => await _repo.GetAllAsync();
 
             public async Task AddAsync(Customer customer)
