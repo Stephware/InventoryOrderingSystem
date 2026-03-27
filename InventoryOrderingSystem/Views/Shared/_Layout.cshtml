@@ -1,10 +1,4 @@
-﻿@*
-
-*@
-@{
-}
-
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -16,63 +10,126 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
-    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
 
-        <ul class="navbar-nav flex-grow-1">
+    <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom mb-3">
+        <div class="container">
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">Inventory System</a>
 
-            @if (User.Identity != null && User.Identity.IsAuthenticated)
-            {
-                if (User.IsInRole("Admin"))
-                {
-                    <li><a class="nav-link" asp-controller="Order">Orders</a></li>
-                    <li><a class="nav-link" asp-controller="Product">Products</a></li>
-                    <li><a class="nav-link" asp-controller="Customer">Customers</a></li>
-                }
-                else if (User.IsInRole("Customer"))
-                {
-                    <li><a class="nav-link" asp-controller="Order">My Orders</a></li>
-                }
-            }
-            else
-            {
-                <li><a class="nav-link" asp-controller="Account" asp-action="Login">Login</a></li>
-                <li><a class="nav-link" asp-controller="Account" asp-action="Register">Register</a></li>
-            }
-        </ul>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
 
-        <ul class="navbar-nav">
-            @if (User.Identity != null && User.Identity.IsAuthenticated)
-            {
-                <li class="nav-item">
-                    <a class="nav-link text-danger"
-                       onclick="return confirm('Are you sure you want to logout?')"
-                       asp-controller="Account"
-                       asp-action="Logout">
-                        Logout
-                    </a>
-                </li>
-            }
-        </ul>
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Order" asp-action="Index">Orders</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Product" asp-action="Index">Products</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Customer" asp-action="Index">Customers</a>
+                            </li>
+                        }
+                        else if (User.IsInRole("Customer"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Order" asp-action="Index">My Orders</a>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Account" asp-action="Login">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Account" asp-action="Register">Register</a>
+                        </li>
+                    }
+                </ul>
 
-    </div>
+                <ul class="navbar-nav">
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link text-danger"
+                               onclick="return confirm('Logout?')"
+                               asp-controller="Account"
+                               asp-action="Logout">
+                                Logout
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
 
     <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+        @RenderBody()
     </div>
 
-    <footer class="border-top footer text-muted mt-5 py-3">
-        <div class="container">
-            &copy; 2026 - Inventory Ordering System
-        </div>
+    <footer class="border-top text-muted mt-5 py-3 text-center">
+        <small>&copy; 2026 - Inventory Ordering System</small>
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/sweetalert2/sweetalert2.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            @if (TempData["LoginSuccess"] != null)
+            {
+                    <text>
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: '@TempData["LoginSuccess"]'
+                        });
+                    </text>
+            }
+
+            @if (TempData["LogoutSuccess"] != null)
+            {
+                    <text>
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Logged out',
+                            text: '@TempData["LogoutSuccess"]'
+                        });
+                    </text>
+            }
+
+            @if (TempData["Success"] != null)
+            {
+                    <text>
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: '@TempData["Success"]'
+                        });
+                    </text>
+            }
+
+            @if (TempData["Error"] != null)
+            {
+                <text>
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: '@TempData["Error"]'
+                    });
+                </text>
+            }
+        });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

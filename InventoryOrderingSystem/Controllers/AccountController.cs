@@ -1,121 +1,138 @@
-﻿    using InventoryOrderingSystem.Helper;
-    using InventoryOrderingSystem.Models;
-    using InventoryOrderingSystem.Services.Customers;
-    using Microsoft.AspNetCore.Authentication;
-    using Microsoft.AspNetCore.Authentication.Cookies;
-    using Microsoft.AspNetCore.Mvc;
-    using System.Security.Claims;
+﻿using InventoryOrderingSystem.Helper;
+using InventoryOrderingSystem.Models;
+using InventoryOrderingSystem.Services.Customers;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
-    namespace InventoryOrderingSystem.Controllers
+namespace InventoryOrderingSystem.Controllers
+{
+    public class AccountController : Controller
     {
-        public class AccountController : Controller
+        private readonly ICustomerService _customerService;
+
+        public AccountController(ICustomerService customerService)
         {
-            private readonly ICustomerService _customerService;
+            _customerService = customerService;
+        }
 
-            public AccountController(ICustomerService customerService)
+        private async Task SignInUser(string username, string role)
+        {
+            var claims = new List<Claim>
             {
-                _customerService = customerService;
+                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.Role, role)
+            };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(identity),
+                new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTime.UtcNow.AddMinutes(30)
+                });
+        }
+
+        [HttpGet]
+        public IActionResult Login()
+        {
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+                return RedirectToAction("Index", "Order");
+
+            return View(new AdminLoginModel());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Login(AdminLoginModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Please fill in all required fields.";
+                return View(model);
             }
 
-            private async Task SignInUser(string username, string role)
+            try
             {
-                var claims = new List<Claim>
-              {
-                    new Claim(ClaimTypes.Name, username),
-                    new Claim(ClaimTypes.Role, role)
-              };
-
-                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme,
-                    new ClaimsPrincipal(identity),
-                    new AuthenticationProperties
-                    {
-                        IsPersistent = true,
-                        ExpiresUtc = DateTime.UtcNow.AddMinutes(30)
-                    });
-            }
-
-            // ADMIN LOGIN
-            [HttpGet]
-            public IActionResult Login()
-            {
-                if (User.Identity != null && User.Identity.IsAuthenticated)
-                    return RedirectToAction("Index", "Order");
-
-                return View(new AdminLoginModel());
-            }
-
-            [HttpPost]
-            public async Task<IActionResult> Login(AdminLoginModel model)
-            {
-                if (!ModelState.IsValid)
-                    return View(model);
-
                 string adminUsername = "admin";
-                string adminPassword = "123456"; 
+                string adminPassword = "123456";
 
                 if (model.Username == adminUsername && model.Password == adminPassword)
                 {
                     await SignInUser(adminUsername, "Admin");
+                    TempData["LoginSuccess"] = "Welcome Admin!";
                     return RedirectToAction("Index", "Order");
                 }
 
                 var customer = await _customerService.GetByUsernameAsync(model.Username);
 
-                if (customer != null &&
-                    SecurityHelper.VerifyPassword(model.Password, customer.PasswordHash))
-                {
-                    if (!customer.IsActive)
-                    {
-                        ModelState.AddModelError("", "Customer account is inactive.");
-                        return View(model);
-                    }
+                if (customer == null)
+                    throw new Exception("Username does not exist.");
 
-                    await SignInUser(customer.Username, "Customer");
-                    return RedirectToAction("Index", "Home");
-                }
+                if (!SecurityHelper.VerifyPassword(model.Password, customer.PasswordHash))
+                    throw new Exception("Incorrect password.");
 
-                ModelState.AddModelError("", "Invalid username or password");
-                return View(model);
+                if (!customer.IsActive)
+                    throw new Exception("Account is inactive.");
+
+                await SignInUser(customer.Username, "Customer");
+
+                TempData["LoginSuccess"] = $"Welcome, {customer.Username}!";
+                return RedirectToAction("Index", "Home");
             }
-
-
-
-            //REGISTRATION
-            [HttpGet]
-            public IActionResult Register()
+            catch (Exception ex)
             {
-                return View(new RegistrationModel());
-            }
-
-            [HttpPost]
-            public async Task<IActionResult> Register(RegistrationModel model)
-            {
-                if (ModelState.IsValid)
-                {
-                    try
-                    {
-                        await _customerService.RegisterUser(model);
-
-                        ViewBag.SuccessMessage = "Registration successful!";
-                        ModelState.Clear();
-                        return View(new RegistrationModel()); //Reset the form
-                    }
-                    catch (Exception ex)
-                    {
-                        ViewBag.ErrorMessage = ex.Message;
-                    }
-                }
-                return View(model);
-            }
-
-            [HttpGet]
-            public async Task<IActionResult> Logout()
-            {
-                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                return RedirectToAction("Login", "Account");
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Login");
             }
         }
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            return View(new RegistrationModel());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Register(RegistrationModel model)
+        {
+            if (model.Password != model.ConfirmPassword)
+            {
+                ModelState.AddModelError("ConfirmPassword", "Passwords do not match.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .FirstOrDefault()?.ErrorMessage;
+
+                return View(model);
+            }
+
+            try
+            {
+                await _customerService.RegisterUser(model);
+
+                TempData["Success"] = "Registration successful!";
+                return RedirectToAction("Login");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = ex.Message;
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            TempData["LogoutSuccess"] = "You have been logged out.";
+            return RedirectToAction("Login");
+        }
     }
+}
