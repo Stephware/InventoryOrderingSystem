@@ -6,7 +6,7 @@ namespace InventoryOrderingSystem.Services.Orders
     {
         Task<List<Order>> GetAllAsync();
         Task<Order?> GetByIdAsync(int orderId);
-        Task CreateOrderAsync(
+        Task <int> CreateOrderAsync(
             int customerId,
             List<(int productId, int qty)> items
         );

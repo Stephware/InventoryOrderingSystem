@@ -98,11 +98,13 @@ namespace InventoryOrderingSystem.Controllers
                 .Select(i => (i.ProductId, i.Quantity))
                 .ToList();
 
+            var newOrderId = await _orderService.CreateOrderAsync(form.CustomerId, items);
+
             try
             {
                 await _orderService.CreateOrderAsync(form.CustomerId, items);
                 TempData["Success"] = "Order created successfully!";
-                return RedirectToAction("Index");
+                return RedirectToAction("Details", new {id=newOrderId});
             }
             catch (Exception ex)
             {

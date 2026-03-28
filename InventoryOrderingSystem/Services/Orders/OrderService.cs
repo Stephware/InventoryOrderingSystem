@@ -72,7 +72,7 @@ namespace InventoryOrderingSystem.Services.Orders
         public async Task UpdateOrderAsync(Order order)
             => await _orderRepo.UpdateAsync(order);
 
-        public async Task CreateOrderAsync(int customerId, List<(int productId, int qty)> items)
+        public async Task <int> CreateOrderAsync(int customerId, List<(int productId, int qty)> items)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
 
@@ -133,6 +133,8 @@ namespace InventoryOrderingSystem.Services.Orders
                 await _orderRepo.AddAsync(order);
 
                 await transaction.CommitAsync();
+
+                return order.OrderId;
             }
             catch
             {

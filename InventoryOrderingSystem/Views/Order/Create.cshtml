@@ -26,30 +26,133 @@
         </div>
     }
 
-    <h5>Select Product</h5>
+    <h5>Select Products</h5>
 
-    <div class="row mb-2">
-        <div class="col-5">
-            <select name="Items[0].ProductId" class="form-control" required>
-                <option value="">-- Select a Product --</option>
-                @foreach (var product in ViewBag.Products)
-                {
-                    <option value="@product.ProductId">
-                        @product.ProductName (Stock: @product.Stock)
-                    </option>
-                }
-            </select>
-        </div>
+    <div id="items-container">
+        <div class="row mb-2 item-row">
+            <div class="col-5">
+                <select name="Items[0].ProductId" class="form-control product-select" required>
+                    <option value="">-- Select a Product --</option>
+                    @foreach (var product in ViewBag.Products)
+                    {
+                        <option value="@product.ProductId">
+                            @product.ProductName (Stock: @product.Stock)
+                        </option>
+                    }
+                </select>
+            </div>
 
-        <div class="col-3">
-            <input type="number"
-                   name="Items[0].Quantity"
-                   class="form-control"
-                   min="1"
-                   placeholder="Qty"
-                   required />
+            <div class="col-3">
+                <input type="number"
+                       name="Items[0].Quantity"
+                       class="form-control"
+                       min="1"
+                       placeholder="Qty"
+                       required />
+            </div>
+
+            <div class="col-2">
+                <button type="button" class="btn btn-danger remove-item-btn" style="display: none;">
+                    Remove
+                </button>
+            </div>
         </div>
     </div>
 
+    <button type="button" id="add-item-btn" class="btn btn-secondary btn-sm mb-3">
+        + Add Another Product
+    </button>
+    <br />
+
     <button type="submit" class="btn btn-success mt-3">Place Order</button>
 </form>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const container = document.getElementById('items-container');
+
+        // reindex rows
+        function reindexRows() {
+            const rows = container.querySelectorAll('.item-row');
+            rows.forEach((row, index) => {
+                const select = row.querySelector('select');
+                const input = row.querySelector('input');
+                const removeBtn = row.querySelector('.remove-item-btn');
+
+                select.name = `Items[${index}].ProductId`;
+                input.name = `Items[${index}].Quantity`;
+
+                // hide first remove button
+                if (index === 0) {
+                    removeBtn.style.display = 'none';
+                } else {
+                    removeBtn.style.display = 'block';
+                }
+            });
+        }
+
+        // disable selected products
+        function updateDropdowns() {
+            const selects = container.querySelectorAll('.product-select');
+
+            // get selected values
+            const selectedValues = Array.from(selects)
+                .map(s => s.value)
+                .filter(v => v !== "");
+
+            // loop through dropdowns
+            selects.forEach(select => {
+                const currentValue = select.value;
+                const options = select.querySelectorAll('option');
+
+                options.forEach(option => {
+                    // skip default option
+                    if (option.value === "") return;
+
+                    // check for duplicate selections
+                    if (selectedValues.includes(option.value) && option.value !== currentValue) {
+                        option.disabled = true; // disable option
+                    } else {
+                        option.disabled = false; // enable option
+                    }
+                });
+            });
+        }
+
+        // add new row
+        document.getElementById('add-item-btn').addEventListener('click', function () {
+            const firstRow = container.querySelector('.item-row');
+            const newRow = firstRow.cloneNode(true);
+
+            // clear cloned values
+            newRow.querySelector('select').value = "";
+            newRow.querySelector('input').value = "";
+
+            container.appendChild(newRow);
+
+            reindexRows();
+            updateDropdowns();
+        });
+
+        // handle events
+        container.addEventListener('click', function (e) {
+            // remove row
+            if (e.target.classList.contains('remove-item-btn')) {
+                e.target.closest('.item-row').remove();
+                reindexRows();
+                updateDropdowns();
+            }
+        });
+
+        container.addEventListener('change', function (e) {
+            // handle selection change
+            if (e.target.classList.contains('product-select')) {
+                updateDropdowns();
+            }
+        });
+
+        // initial setup
+        reindexRows();
+        updateDropdowns();
+    });
+</script>
