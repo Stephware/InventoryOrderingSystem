@@ -2,12 +2,24 @@
 
 @{
     ViewData["Title"] = "Products";
+
+    int totalItems = ViewBag.TotalItems ?? 0;
+    int currentPage = ViewBag.Page ?? 1;
+    int pageSize = ViewBag.PageSize ?? 10;
+    string search = ViewBag.Search as string;
+    int totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Inventory Management</h2>
     <a asp-action="Create" class="btn btn-primary">Add New Product</a>
 </div>
+
+<form method="get" asp-action="Index" class="mb-3 d-flex gap-2 w-50">
+    <input type="text" name="search" value="@search" class="form-control" placeholder="Search products..." />
+    <button type="submit" class="btn btn-secondary">Search</button>
+    <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+</form>
 
 <table class="table table-striped table-hover border align-middle">
     <thead class="table-dark">
@@ -62,3 +74,33 @@
 
     </tbody>
 </table>
+
+@if (totalPages > 1)
+{
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center mt-4">
+
+            <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@(currentPage - 1)" asp-route-search="@search" aria-label="Previous">
+                    <span aria-hidden="true">&lt;</span>
+                </a>
+            </li>
+
+            @for (int i = 1; i <= totalPages; i++)
+            {
+                <li class="page-item @(currentPage == i ? "active" : "")">
+                    <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-search="@search">
+                        @i
+                    </a>
+                </li>
+            }
+
+            <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@(currentPage + 1)" asp-route-search="@search" aria-label="Next">
+                    <span aria-hidden="true">&gt;</span>
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+}

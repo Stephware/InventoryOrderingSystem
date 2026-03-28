@@ -32,7 +32,7 @@ namespace InventoryOrderingSystem.Controllers
                 new ClaimsPrincipal(identity),
                 new AuthenticationProperties
                 {
-                    IsPersistent = true,
+                    IsPersistent = false,
                     ExpiresUtc = DateTime.UtcNow.AddMinutes(30)
                 });
         }

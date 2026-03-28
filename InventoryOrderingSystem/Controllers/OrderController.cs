@@ -1,4 +1,5 @@
-﻿using InventoryOrderingSystem.Services.Customers;
+﻿using InventoryOrderingSystem.Models.Database;
+using InventoryOrderingSystem.Services.Customers;
 using InventoryOrderingSystem.Services.Orders;
 using InventoryOrderingSystem.Services.Products;
 using Microsoft.AspNetCore.Authorization;
@@ -33,19 +34,49 @@ namespace InventoryOrderingSystem.Controllers
         }
 
         [Authorize(Roles = "Admin,Customer")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string search, int page = 1)
         {
+            int pageSize = 10;
+            IEnumerable<Order> orders;
+
             if (User.IsInRole("Admin"))
-                return View(await _orderService.GetAllAsync());
+            {
+                orders = await _orderService.GetAllAsync();
+            }
+            else
+            {
+                var username = User.Identity.Name;
+                var customer = await _customerService.GetByUsernameAsync(username);
 
-            var username = User.Identity.Name;
-            var customer = await _customerService.GetByUsernameAsync(username);
+                if (customer == null)
+                    return Unauthorized();
 
-            if (customer == null)
-                return Unauthorized();
+                var allOrders = await _orderService.GetAllAsync();
+                orders = allOrders.Where(o => o.CustomerId == customer.CustomerId);
+            }
 
-            var orders = await _orderService.GetAllAsync();
-            return View(orders.Where(o => o.CustomerId == customer.CustomerId).ToList());
+            if (!string.IsNullOrEmpty(search))
+            {
+                orders = orders.Where(o =>
+                    (o.Status != null && o.Status.Contains(search, StringComparison.OrdinalIgnoreCase)) ||
+                    o.OrderId.ToString().Contains(search)
+                ).ToList();
+            }
+
+            int totalItems = orders.Count();
+
+            var paginatedOrders = orders
+                .OrderByDescending(o => o.DateCreated)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            ViewBag.TotalItems = totalItems;
+            ViewBag.Page = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.Search = search;
+
+            return View(paginatedOrders);
         }
 
         public async Task<IActionResult> Details(int id)

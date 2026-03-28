@@ -15,10 +15,33 @@ namespace InventoryOrderingSystem.Controllers
             _productService = productService;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string search, int page = 1)
         {
+            int pageSize = 10;
+
             var products = await _productService.GetAllProductsAsync();
-            return View(products);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                products = products.Where(p =>
+                    p.ProductName != null && p.ProductName.Contains(search, StringComparison.OrdinalIgnoreCase)
+                ).ToList();
+            }
+
+            int totalItems = products.Count();
+
+            var paginatedProducts = products
+                .OrderByDescending(p => p.ProductId)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            ViewBag.TotalItems = totalItems;
+            ViewBag.Page = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.Search = search;
+
+            return View(paginatedProducts);
         }
 
         [HttpGet]
@@ -27,7 +50,6 @@ namespace InventoryOrderingSystem.Controllers
             return View(new Product());
         }
 
-        [HttpPost]
         [HttpPost]
         public async Task<IActionResult> Create(Product product)
         {
@@ -54,7 +76,6 @@ namespace InventoryOrderingSystem.Controllers
             return RedirectToAction("Index");
         }
 
-        [HttpPost]
         [HttpPost]
         public async Task<IActionResult> UpdatePrice(int id, decimal price)
         {

@@ -12,10 +12,33 @@ public class CustomerController : Controller
         _customerService = customerService;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(string search, int page = 1)
     {
+        int pageSize = 10;
+
         var customers = await _customerService.GetAllAsync();
-        return View(customers);
+
+        if (!string.IsNullOrEmpty(search))
+        {
+            customers = customers.Where(c =>
+                (c.Username != null && c.Username.Contains(search, StringComparison.OrdinalIgnoreCase))
+            ).ToList();
+        }
+
+        int totalItems = customers.Count();
+
+        var paginatedCustomers = customers
+            .OrderByDescending(c => c.CustomerId)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        ViewBag.TotalItems = totalItems;
+        ViewBag.Page = page;
+        ViewBag.PageSize = pageSize;
+        ViewBag.Search = search;
+
+        return View(paginatedCustomers);
     }
 
     [HttpPost]
